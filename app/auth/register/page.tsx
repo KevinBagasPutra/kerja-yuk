@@ -1,5 +1,6 @@
 import { register } from "@/app/actions"
 import Link from "next/link"
+export const dynamic = 'force-dynamic'
 export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
