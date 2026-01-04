@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  phone     String   @unique
+  name      String
+  password  String
+  role      UserRole @default(WORKER)
+  avatar    String?
+  location  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workerProfile   WorkerProfile?
+  employerProfile EmployerProfile?
+  applications    Application[]
+  jobs            Job[]            @relation("JobPostedBy")
+  notifications   Notification[]
+  savedJobs       SavedJob[]
+  sentReviews     Review[]         @relation("ReviewSent")
+  receivedReviews Review[]         @relation("ReviewReceived")
+  jobViews        JobView[]
+
+  @@index([phone])
+  @@index([role])
+}
+
+model WorkerProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  experience        String
+  skills            String[]
+  bio               String?
+  rating            Float     @default(0)
+  totalJobs         Int       @default(0)
+  completedJobs     Int       @default(0)
+  averageRating     Float     @default(0)
+  availability      Boolean   @default(true)
+  preferredJobTypes JobType[]
+  createdAt         DateTime  @default(now())
+}
+
+model EmployerProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  companyName        String?
+  projectType        String
+  rating             Float    @default(0)
+  verified           Boolean  @default(false)
+  totalPostedJobs    Int      @default(0)
+  companyAddress     String?
+  companyDescription String?
+  createdAt          DateTime @default(now())
+}
+
+model Job {
+  id              String      @id @default(cuid())
+  title           String
+  description     String
+  category        JobCategory
+  location        String
+  jobType         JobType     @default(DAILY)
+  salaryType      SalaryType
+  salaryMin       Int
+  salaryMax       Int
+  duration        String?
+  startDate       DateTime
+  endDate         DateTime?
+  urgent          Boolean     @default(false)
+  status          JobStatus   @default(ACTIVE)
+  viewsCount      Int         @default(0)
+  applicantsCount Int         @default(0)
+
+  employerId   String
+  employer     User          @relation("JobPostedBy", fields: [employerId], references: [id])
+  applications Application[]
+  savedBy      SavedJob[]
+  views        JobView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Application {
+  id        String            @id @default(cuid())
+  jobId     String
+  job       Job               @relation(fields: [jobId], references: [id])
+  workerId  String
+  worker    User              @relation(fields: [workerId], references: [id])
+  status    ApplicationStatus @default(PENDING)
+  message   String?
+  appliedAt DateTime          @default(now())
+
+  @@unique([jobId, workerId])
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, jobId])
+}
+
+model JobView {
+  id    String @id @default(cuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  ipAddress String?
+  viewedAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  data      Json?
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("ReviewSent", fields: [senderId], references: [id])
+  receiverId String
+  receiver   User     @relation("ReviewReceived", fields: [receiverId], references: [id])
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+}
+
+enum UserRole {
+  WORKER
+  EMPLOYER
+  ADMIN
+}
+
+enum JobCategory {
+  CONSTRUCTION
+  CLEANING
+  PACKING
+  WAREHOUSE
+  RETAIL
+  EVENT
+  OTHER
+}
+
+enum JobType {
+  DAILY
+  WEEKLY
+}
+
+enum SalaryType {
+  PER_DAY
+  PER_WEEK
+}
+
+enum JobStatus {
+  ACTIVE
+  FILLED
+  EXPIRED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}

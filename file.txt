@@ -1,0 +1,37 @@
+my-nextjs-app/
+├── .env
+├── package.json
+├── tailwind.config.ts
+├── prisma/
+│   └── schema.prisma
+├── lib/
+│   └── prisma.ts
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── actions.ts
+│   ├── auth/
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── register/
+│   │       └── page.tsx
+│   ├── dashboard/
+│   │   ├── page.tsx
+│   │   ├── post/
+│   │   │   └── page.tsx
+│   │   ├── profile/
+│   │   │   └── page.tsx
+│   │   ├── notifications/
+│   │   │   └── page.tsx
+│   │   └── saved/
+│   │       └── page.tsx
+│   └── jobs/
+│       └── [id]/
+│           └── page.tsx
+└── components/
+    ├── Navbar.tsx
+    ├── JobCard.tsx
+    ├── ApplyButton.tsx
+    ├── SaveButton.tsx
+    └── MarkReadButton.tsx
